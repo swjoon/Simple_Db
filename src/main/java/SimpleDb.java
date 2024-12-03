@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.*;
+import java.util.stream.IntStream;
 
 public class SimpleDb {
     private final String url;
@@ -9,7 +10,7 @@ public class SimpleDb {
     private ObjectMapper om = new ObjectMapper();
 
     public SimpleDb(String host, int port, String dbName, String username, String password) {
-        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbName;
+        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false";
         this.username = username;
         this.password = password;
     }
@@ -22,11 +23,13 @@ public class SimpleDb {
         }
     }
 
-    public void run(String sql) {
+    public void run(String sql, Object... params) {
         try (Connection connection = createConnection();
-             Statement statement = connection.createStatement();
-        ) {
-            statement.executeUpdate(sql);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            for (int i = 0; i < params.length; i++) {
+                preparedStatement.setObject(i + 1, params[i]);
+            }
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("데이터베이스 입력 실패", e);
         }
