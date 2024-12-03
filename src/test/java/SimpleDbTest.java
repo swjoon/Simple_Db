@@ -1,5 +1,7 @@
 import org.junit.jupiter.api.*;
 
+import java.util.stream.IntStream;
+
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class SimpleDbTest {
     private static SimpleDb simpleDb;
@@ -26,5 +28,28 @@ public class SimpleDbTest {
                     isBlind BIT(1) NOT NULL DEFAULT 0
                 )
                 """);
+    }
+
+    @Test
+    public void makeArticleTestData() {
+        IntStream.rangeClosed(1, 6).forEach(no -> {
+            boolean isBlind = no > 3;
+            String title = "제목%d".formatted(no);
+            String body = "내용%d".formatted(no);
+
+            simpleDb.run("""
+                    INSERT INTO article
+                    SET createdDate = NOW(),
+                    modifiedDate = NOW(),
+                    title = ?,
+                    `body` = ?,
+                    isBlind = ?
+                    """, title, body, isBlind);
+        });
+    }
+
+    @Test
+    public void truncateArticleTable() {
+        simpleDb.run("TRUNCATE article");
     }
 }
