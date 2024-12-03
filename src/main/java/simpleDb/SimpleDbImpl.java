@@ -1,16 +1,19 @@
+package simpleDb;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import sql.Sql;
+import sql.SqlImpl;
 
 import java.sql.*;
-import java.util.stream.IntStream;
 
-public class SimpleDb {
+public class SimpleDbImpl implements SimpleDb{
     private final String url;
     private final String username;
     private final String password;
     private ObjectMapper om = new ObjectMapper();
 
-    public SimpleDb(String host, int port, String dbName, String username, String password) {
-        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false";
+    public SimpleDbImpl(String host, int port, String dbName, String username, String password) {
+        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbName + "?serverTimezone=Asia/Seoul&useLegacyDatetimeCode=false&characterEncoding=UTF-8&useUnicode=true";
         this.username = username;
         this.password = password;
     }
@@ -31,8 +34,12 @@ public class SimpleDb {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("데이터베이스 입력 실패", e);
+            throw new RuntimeException("데이터베이스 입력 오류", e);
         }
+    }
+
+    public Sql genSql(){
+        return new SqlImpl(createConnection());
     }
 
 }
